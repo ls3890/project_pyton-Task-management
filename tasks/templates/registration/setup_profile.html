@@ -1,154 +1,36 @@
 {% extends 'base.html' %}
 
-{% block title %}הגדרת פרופיל{% endblock %}
-
 {% block content %}
-<div class="container" style="max-width: 500px; margin: 3rem auto;">
-    <div class="card">
-        <h2 style="text-align: center; margin-bottom: 1rem;">🎯 הגדרת פרופיל באיזור האישי</h2>
-        <p style="text-align: center; color: #64748b; margin-bottom: 2rem;">
-            שלום {{ user.username }}! ברוך הבא לאיזור האישי שלך.<br>
-            עכשיו תוכל להגדיר לאיזה צוות אתה שייך ומה התפקיד שלך במערכת
-        </p>
+<div class="container" style="max-width: 500px; margin: 5rem auto; padding: 0 1rem;">
+    <div class="card" style="background: white; padding: 2.5rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
 
-        <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; margin-bottom: 2rem; font-size: 0.9rem;">
-            <h4 style="margin: 0 0 0.5rem 0; color: #374151;">⚠️ חשוב: הסבר על התפקידים במערכת</h4>
-            <div style="background: white; padding: 0.75rem; border-radius: 8px; margin: 0.5rem 0;">
-                <p style="margin: 0.25rem 0;"><strong>🎖️ מנהל:</strong> יכול לצפות בכל המשימות, ליצור משימות חדשות, לערוך ולמחוק משימות שלא שויכו לעובדים</p>
-            </div>
-            <div style="background: white; padding: 0.75rem; border-radius: 8px; margin: 0.5rem 0;">
-                <p style="margin: 0.25rem 0;"><strong>👤 עובד:</strong> יכול לצפות במשימות של הצוות, לשייך לעצמו משימות פנויות ולעדכן את הסטטוס שלהן</p>
-            </div>
-        </div>
+        <h2 style="text-align: center; margin-bottom: 2rem; color: #1e293b;">הגדרת פרופיל ראשונית</h2>
 
         <form method="POST">
             {% csrf_token %}
 
-            <!-- Team Selection -->
-            <div class="form-group" style="margin-bottom: 2rem;">
-                <label for="{{ form.team.id_for_label }}" style="font-weight: bold; font-size: 1.1rem; display: block; margin-bottom: 0.5rem;">
-                    🏢 {{ form.team.label }}
-                </label>
-                {{ form.team }}
-                {% if form.team.errors %}
-                    <div class="error">{{ form.team.errors }}</div>
-                {% endif %}
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 700; margin-bottom: 0.5rem;">בחר את הצוות שלך:</label>
+                <select name="team" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                    <option value="" disabled selected>-- בחר מהרשימה --</option>
+                    {% for team in teams %}
+                        <option value="{{ team.id }}">{{ team.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
 
-            <!-- ROLE SELECTION - Main Django Form Field -->
-            {% if form.role %}
-            <div class="form-group" style="border: 3px solid #4f46e5; border-radius: 12px; padding: 1.5rem; background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%); margin: 1.5rem 0;">
-                <label style="font-weight: bold; font-size: 1.2rem; color: #1e293b; display: block; margin-bottom: 0.5rem;">
-                    🎖️ {{ form.role.label }}
-                </label>
-                <p style="font-size: 0.9rem; color: #475569; margin: 0.5rem 0 1rem 0; font-weight: 500;">
-                    ⭐ בחירה חשובה: התפקיד שלך יקבע את ההרשאות שלך במערכת
-                </p>
-
-                <div style="background: white; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    {{ form.role }}
-                </div>
-
-                {% if form.role.errors %}
-                    <div class="error">{{ form.role.errors }}</div>
-                {% endif %}
-
-                <div style="margin-top: 1rem; font-size: 0.85rem; color: #64748b;">
-                    <p style="margin: 0.25rem 0;">🎖️ <strong>מנהל:</strong> ניהול מלא של משימות הצוות</p>
-                    <p style="margin: 0.25rem 0;">👤 <strong>עובד:</strong> ביצוע ועדכון משימות</p>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- ROLE SELECTION - GUARANTEED VISIBLE FALLBACK -->
-            <div style="border: 4px solid #dc2626; border-radius: 15px; padding: 2rem; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); margin: 2rem 0;">
-                <h3 style="margin: 0 0 1rem 0; color: #dc2626; font-size: 1.5rem; text-align: center;">
-                    🚨 בחירת תפקיד במערכת - חובה! 🚨
-                </h3>
-
-                <div style="background: white; padding: 2rem; border-radius: 12px; border: 3px solid #ef4444; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
-                    <label for="role_selection" style="font-weight: bold; display: block; margin-bottom: 1rem; color: #1f2937; font-size: 1.3rem; text-align: center;">
-                        🎖️ אני רוצה להיות:
-                    </label>
-
-                    <select name="role" id="role_selection" required
-                            style="width: 100%; padding: 1.5rem; border: 3px solid #dc2626; border-radius: 12px; font-size: 1.4rem; background: white; font-weight: bold; cursor: pointer; text-align: center;">
-                        <option value="" style="color: #6b7280;">-- בחר את התפקיד שלך --</option>
-                        <option value="employee" style="font-size: 1.2rem; font-weight: bold;">👤 עובד</option>
-                        <option value="manager" style="font-size: 1.2rem; font-weight: bold;">🎖️ מנהל</option>
-                    </select>
-                </div>
-
-                <div style="margin-top: 1.5rem; background: white; padding: 1.5rem; border-radius: 10px; border-left: 5px solid #dc2626;">
-                    <h4 style="margin: 0 0 1rem 0; color: #dc2626; font-size: 1.2rem;">הבדלים בין התפקידים:</h4>
-
-                    <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; margin: 0.5rem 0; border-left: 4px solid #3b82f6;">
-                        <strong>🎖️ מנהל:</strong>
-                        <ul style="margin: 0.5rem 0 0 1rem;">
-                            <li>רואה את כל המשימות של הצוות</li>
-                            <li>יוצר משימות חדשות</li>
-                            <li>עורך ומוחק משימות לא מושכות</li>
-                            <li>מנהל את הצוות</li>
-                        </ul>
-                    </div>
-
-                    <div style="background: #f0fdf4; padding: 1rem; border-radius: 8px; margin: 0.5rem 0; border-left: 4px solid #10b981;">
-                        <strong>👤 עובד:</strong>
-                        <ul style="margin: 0.5rem 0 0 1rem;">
-                            <li>רואה משימות של הצוות</li>
-                            <li>משייך לעצמו משימות פנויות</li>
-                            <li>מעדכן סטטוס של המשימות שלו</li>
-                            <li>עוקב אחר ההתקדמות</li>
-                        </ul>
-                    </div>
-                </div>
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; font-weight: 700; margin-bottom: 0.5rem;">מה התפקיד שלך?</label>
+                <select name="role" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                    <option value="employee">👤 עובד (מבצע משימות)</option>
+                    <option value="manager">🎖️ מנהל (יוצר משימות)</option>
+                </select>
             </div>
 
-            {% if form.non_field_errors %}
-                <div class="error" style="margin-bottom: 1rem; padding: 1rem; background: #fee2e2; border-radius: 8px; border-left: 4px solid #dc2626;">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.2rem; font-weight: bold;">
-                🚀 המשך לאיזור האישי
+            <button type="submit" style="width: 100%; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;">
+                שמור והמשך למערכת
             </button>
         </form>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const roleSelect = document.querySelector('#role_selection');
-    const djangoRoleSelect = document.querySelector('#id_role');
-
-    // Highlight the role selection when changed
-    roleSelect.addEventListener('change', function() {
-        if (this.value) {
-            this.style.backgroundColor = '#dcfce7';
-            this.style.borderColor = '#10b981';
-            // Sync with Django form field if it exists
-            if (djangoRoleSelect) {
-                djangoRoleSelect.value = this.value;
-            }
-        }
-    });
-
-    // Also sync the Django field with backup field
-    if (djangoRoleSelect) {
-        djangoRoleSelect.addEventListener('change', function() {
-            roleSelect.value = this.value;
-        });
-    }
-
-    form.addEventListener('submit', function(e) {
-        if (!roleSelect.value && (!djangoRoleSelect || !djangoRoleSelect.value)) {
-            e.preventDefault();
-            alert('❗ חובה לבחור תפקיד!');
-            roleSelect.focus();
-        }
-    });
-});
-</script>
 {% endblock %}

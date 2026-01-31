@@ -5,10 +5,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('tasks.urls')),
+    path('', include('tasks.urls')), # זה שולח את המשתמש ל-urls.py של האפליקציה
 ]
 
-# הגדרה לטיפול בstatic files בפיתוח
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
-
