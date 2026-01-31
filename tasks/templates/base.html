@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ניהול משימות צוות{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container header-content">
+            <h1 class="logo">TaskMaster</h1>
+            <nav class="main-nav">
+                <a href="{% url 'task_list' %}" class="nav-link">המשימות שלי</a>
+                {% if user.is_authenticated %}
+                    <span class="user-tag">שלום, <strong>{{ user.username }}</strong></span>
+                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn">התנתק</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link">התחבר</a>
+                    <a href="{% url 'register' %}" class="nav-link highlight">הרשם</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="main-footer">
+        <p>© 2026 מערכת ניהול משימות צוותית</p>
+    </footer>
+</body>
+</html>

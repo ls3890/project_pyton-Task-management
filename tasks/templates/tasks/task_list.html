@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* עיצוב ייחודי לדף המשימות כדי שייראה כמו בצילום המסך */
+    .task-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 15px; /* יוצר רווח בין השורות */
+        margin-top: 1rem;
+    }
+    .task-row {
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border-radius: 15px;
+        transition: transform 0.2s;
+    }
+    .task-row:hover {
+        transform: translateY(-2px);
+    }
+    .task-row td {
+        padding: 1.5rem;
+        background: white;
+    }
+    .task-row td:first-child { border-radius: 0 15px 15px 0; }
+    .task-row td:last-child { border-radius: 15px 0 0 15px; }
+
+    .badge {
+        padding: 6px 15px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 0.85rem;
+    }
+    .badge-new { background-color: #e0e7ff; color: #4338ca; } /* כחול בהיר */
+    .badge-in_progress { background-color: #fef3c7; color: #92400e; } /* צהוב */
+    .badge-completed { background-color: #dcfce7; color: #166534; } /* ירוק */
+</style>
+
+<div class="container" style="max-width: 1100px; margin: 3rem auto; padding: 0 1rem;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem;">
+        <div>
+            <h1 style="margin: 0; font-size: 2.2rem; font-weight: 900; color: #1e293b;">שלום, {{ user.username }}</h1>
+            <p style="color: #64748b; margin: 5px 0 0;">יש לנו כמה משימות להשלים היום בצוות: <strong>{{ user.profile.team.name }}</strong></p>
+        </div>
+        {% if is_manager %}
+            <a href="{% url 'create_task' %}" class="btn btn-primary" style="background: #4f46e5; color: white; padding: 0.8rem 1.5rem; border-radius: 10px; text-decoration: none; font-weight: bold;">
+                <span>+ משימה חדשה</span>
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="card" style="padding: 1.2rem 2rem; background: white; border-radius: 15px; margin-bottom: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+        <form method="GET" style="display: flex; gap: 2rem; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-weight: 700; color: #4f46e5;">סינון לפי סטטוס:</span>
+                <select name="status" onchange="this.form.submit()" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 15px; outline: none;">
+                    <option value="">כל המשימות</option>
+                    <option value="new" {% if selected_status == 'new' %}selected{% endif %}>🆕 חדשות</option>
+                    <option value="in_progress" {% if selected_status == 'in_progress' %}selected{% endif %}>🚧 בטיפול</option>
+                    <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>✅ הושלמו</option>
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-weight: 700; color: #4f46e5;">סינון לפי עובד:</span>
+                <select name="worker" onchange="this.form.submit()" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 15px; outline: none;">
+                    <option value="">כל העובדים</option>
+                    <option value="unassigned" {% if selected_worker == 'unassigned' %}selected{% endif %}>ללא שיוך</option>
+                    {% for member in team_members %}
+                        <option value="{{ member.id }}" {% if selected_worker == member.id|stringformat:"s" %}selected{% endif %}>{{ member.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <table class="task-table">
+        <tbody>
+            {% for task in tasks %}
+            <tr class="task-row">
+                <td style="width: 45%;">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">{{ task.title }}</div>
+                    <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 4px;">{{ task.description|truncatechars:70 }}</div>
+                </td>
+                <td style="text-align: center;">
+                    <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">יעד</div>
+                    <div style="font-weight: 700; color: #475569;">{{ task.due_date|date:"d M" }}</div>
+                </td>
+                <td style="text-align: center;">
+                    <span class="badge badge-{{ task.status }}">{{ task.get_status_display }}</span>
+                </td>
+                <td style="text-align: left;">
+                    {% if is_manager and not task.assigned_to %}
+                        <a href="{% url 'edit_task' task.id %}" style="text-decoration: none; margin-left: 15px;" title="ערוך">✏️</a>
+                        <a href="{% url 'delete_task' task.id %}" style="text-decoration: none;" title="מחק" onclick="return confirm('בטוח שברצונך למחוק?')">🗑️</a>
+                    {% endif %}
+
+                    {% if not task.assigned_to and user.profile.role == 'employee' %}
+                        <a href="{% url 'assign_task' task.id %}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem; background: #4f46e5; color: white; border-radius: 8px; text-decoration: none;">שייך אלי</a>
+                    {% elif task.assigned_to == user %}
+                        <form method="POST" action="{% url 'change_status' task.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <select name="status" onchange="this.form.submit()" style="border-radius: 8px; border: 1px solid #ddd; padding: 4px; font-size: 0.85rem;">
+                                {% for key, val in task.STATUS_CHOICES %}
+                                    <option value="{{ key }}" {% if task.status == key %}selected{% endif %}>{{ val }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    {% elif task.assigned_to %}
+                        <span style="font-size: 0.8rem; color: #94a3b8;">מבצע: {{ task.assigned_to.username }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="text-align: center; padding: 5rem; background: white; border-radius: 15px;">
+                <div style="font-size: 3rem;">☕</div>
+                <div style="color: #94a3b8; margin-top: 1rem; font-size: 1.2rem;">אין משימות כרגע בצוות. זמן להפסקה!</div>
+            </td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

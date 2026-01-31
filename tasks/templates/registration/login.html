@@ -1,0 +1,7 @@
+<h2 dir="rtl">התחברות למערכת</h2>
+<form method="post" dir="rtl">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">התחבר</button>
+</form>
+<p dir="rtl">עוד לא רשום? <a href="{% url 'register' %}">הירשם כאן</a></p>

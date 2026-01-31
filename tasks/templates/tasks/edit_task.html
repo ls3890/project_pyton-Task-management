@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}ערוך משימה{% endblock %}
+
+{% block content %}
+<h2>ערוך משימה</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    <div>
+        <label>שם המשימה:</label>
+        <input type="text" name="title" value="{{ task.title }}" required>
+    </div>
+    <div>
+        <label>תיאור:</label>
+        <textarea name="description">{{ task.description }}</textarea>
+    </div>
+    <div>
+        <label>תאריך יעד:</label>
+        <input type="date" name="due_date" value="{{ task.due_date }}" required>
+    </div>
+    <button type="submit">עדכן משימה</button>
+    <a href="{% url 'task_list' %}">ביטול</a>
+</form>
+{% endblock %}
