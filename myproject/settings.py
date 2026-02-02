@@ -123,4 +123,5 @@ STATICFILES_DIRS = [
 
 LOGIN_REDIRECT_URL = 'task_list'
 LOGOUT_REDIRECT_URL = 'login'
-LOGIN_URL = 'register'
+LOGIN_URL = 'login'
+

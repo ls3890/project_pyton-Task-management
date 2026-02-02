@@ -172,4 +172,4 @@ def change_status(request, task_id):
 # --- 9. התנתקות (Logout) ---
 def logout_view(request):
     logout(request)
-    return redirect('register')
+    return redirect('login')
